@@ -5,8 +5,7 @@ import type { Profile } from "../lib/database.types";
 import { motion, AnimatePresence } from "motion/react";
 import { Home, Calendar, User, Sparkles, BookOpen, Sun, Moon } from "lucide-react";
 import northStarIcon from "../imports/InspiredFounders_NorthStarIcon_White.png";
-import logoBlack from "../imports/InspiredFounders_PrimaryLogo_Black.svg";
-import logoWhite from "../imports/InspiredFounders_PrimaryLogo_White.svg";
+import logoColour from "../imports/InspiredFounders_PrimaryLogo_Colour.svg";
 import { OnboardingFlow } from "./components/OnboardingFlow";
 import type { OnboardingData } from "./components/OnboardingFlow";
 import { JoinClubModal } from "./components/JoinClubModal";
@@ -109,7 +108,7 @@ function IntroScreen({ theme, onDone }: { theme: AppTheme; onDone: () => void })
               CREATED BY
             </p>
             <img
-              src={isDark ? logoWhite : logoBlack}
+              src={logoColour}
               alt="Inspired Founders"
               className="object-contain"
               style={{ width: "180px", height: "auto" }}
