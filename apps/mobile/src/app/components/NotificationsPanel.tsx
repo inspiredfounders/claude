@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Heart, MessageCircle, UserPlus, Calendar, Star, Bell, Zap, Sparkles, BellOff, BellRing, ChevronRight, Check } from "lucide-react";
 import { getDailyNotification, getNotificationPreview } from "../../lib/dailyContent";
-import { getPermissionState, requestPermissionAndSubscribe, unsubscribe, updateNotifyHour } from "../../lib/pushNotifications";
+import { getPermissionState, getPermissionStateAsync, requestPermissionAndSubscribe, unsubscribe, updateNotifyHour } from "../../lib/pushNotifications";
 
 interface Props {
   onClose: () => void;
@@ -295,9 +295,14 @@ export function NotificationsPanel({ onClose }: Props) {
   });
 
   useEffect(() => {
-    // Re-check on tab focus
+    // Resolve the real permission state async (matters on native, where the
+    // sync check above can't see the OS-level permission).
+    getPermissionStateAsync().then(setPermState).catch(() => {});
+
+    // Re-check on tab focus (web) — a no-op on native since there's no
+    // "focus" event there, but harmless to attach.
     const check = () => {
-      try { setPermState(getPermissionState()); } catch {}
+      getPermissionStateAsync().then(setPermState).catch(() => {});
     };
     window.addEventListener("focus", check);
     return () => window.removeEventListener("focus", check);

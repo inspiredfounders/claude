@@ -447,13 +447,9 @@ export function ClubScreen() {
           duration:         r.duration ?? "—",
           rating:           4.9,
           reviews:          0,
-          isSaved:          false,
-          isNew:            r.is_new,
-          isFeatured:       r.is_featured,
-          thumbnail:        r.thumbnail_url ?? "https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&auto=format",
-          description:      r.description ?? "",
-          pages:            r.pages ?? undefined,
-          fileUrl:          r.file_url ?? undefined,
+          image:            r.thumbnail_url ?? "https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&auto=format",
+          locked:           false, // vault_items visibility is already gated by RLS (member/admin only)
+          featured:         r.is_featured,
         }));
         setLiveItems(mapped);
       }).catch(() => {});

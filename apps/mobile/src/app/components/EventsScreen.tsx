@@ -816,9 +816,9 @@ export function EventsScreen({
         {/* Tab switcher — 3 tabs */}
         <div className="flex bg-muted rounded-2xl p-1 gap-0.5">
           {([
-            { id: "upcoming",  label: "Upcoming" },
+            { id: "upcoming",  label: "Upcoming", live: false },
             { id: "assembly",  label: "Sessions", live: true },
-            { id: "past",      label: "Past" },
+            { id: "past",      label: "Past", live: false },
           ] as const).map(({ id, label, live }) => (
             <button key={id} onClick={() => setTab(id)}
               className="flex-1 py-2 rounded-xl text-xs flex items-center justify-center gap-1 transition-all"

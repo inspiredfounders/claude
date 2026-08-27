@@ -17,6 +17,7 @@ export interface Database {
           email: string;
           full_name: string;
           avatar_url: string | null;
+          cover_url: string | null;
           bio: string | null;
           role: UserRole;
           company: string | null;
@@ -29,6 +30,13 @@ export interface Database {
           member_since: string | null;
           is_verified: boolean;
           notification_preferences: Json;
+          birth_date: string | null;
+          birth_time: string | null;
+          birth_city: string | null;
+          birth_country: string | null;
+          sun_sign: string | null;
+          moon_sign: string | null;
+          rising_sign: string | null;
         };
         Insert: Omit<Database["public"]["Tables"]["profiles"]["Row"], "created_at" | "updated_at" | "is_verified"> & {
           created_at?: string;
@@ -36,6 +44,7 @@ export interface Database {
           is_verified?: boolean;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
+        Relationships: [];
       };
 
       posts: {
@@ -55,15 +64,21 @@ export interface Database {
           is_pinned: boolean;
           is_deleted: boolean;
         };
-        Insert: Omit<Database["public"]["Tables"]["posts"]["Row"], "created_at" | "updated_at" | "likes_count" | "comments_count" | "is_pinned" | "is_deleted"> & {
+        Insert: Omit<Database["public"]["Tables"]["posts"]["Row"], "id" | "created_at" | "updated_at" | "media_url" | "media_type" | "hashtags" | "collaborator_ids" | "likes_count" | "comments_count" | "is_pinned" | "is_deleted"> & {
+          id?: string;
           created_at?: string;
           updated_at?: string;
+          media_url?: string | null;
+          media_type?: "image" | "video" | null;
+          hashtags?: string[];
+          collaborator_ids?: string[];
           likes_count?: number;
           comments_count?: number;
           is_pinned?: boolean;
           is_deleted?: boolean;
         };
         Update: Partial<Database["public"]["Tables"]["posts"]["Insert"]>;
+        Relationships: [];
       };
 
       post_likes: {
@@ -73,7 +88,8 @@ export interface Database {
           created_at: string;
         };
         Insert: Omit<Database["public"]["Tables"]["post_likes"]["Row"], "created_at"> & { created_at?: string };
-        Update: never;
+        Update: Partial<Database["public"]["Tables"]["post_likes"]["Insert"]>;
+        Relationships: [];
       };
 
       post_saves: {
@@ -83,7 +99,8 @@ export interface Database {
           created_at: string;
         };
         Insert: Omit<Database["public"]["Tables"]["post_saves"]["Row"], "created_at"> & { created_at?: string };
-        Update: never;
+        Update: Partial<Database["public"]["Tables"]["post_saves"]["Insert"]>;
+        Relationships: [];
       };
 
       comments: {
@@ -97,12 +114,15 @@ export interface Database {
           likes_count: number;
           is_deleted: boolean;
         };
-        Insert: Omit<Database["public"]["Tables"]["comments"]["Row"], "created_at" | "likes_count" | "is_deleted"> & {
+        Insert: Omit<Database["public"]["Tables"]["comments"]["Row"], "id" | "created_at" | "parent_id" | "likes_count" | "is_deleted"> & {
+          id?: string;
           created_at?: string;
+          parent_id?: string | null;
           likes_count?: number;
           is_deleted?: boolean;
         };
         Update: Partial<Database["public"]["Tables"]["comments"]["Insert"]>;
+        Relationships: [];
       };
 
       events: {
@@ -132,6 +152,7 @@ export interface Database {
           attendees_count?: number;
         };
         Update: Partial<Database["public"]["Tables"]["events"]["Insert"]>;
+        Relationships: [];
       };
 
       event_rsvps: {
@@ -143,6 +164,7 @@ export interface Database {
         };
         Insert: Omit<Database["public"]["Tables"]["event_rsvps"]["Row"], "created_at"> & { created_at?: string };
         Update: Partial<Database["public"]["Tables"]["event_rsvps"]["Insert"]>;
+        Relationships: [];
       };
 
       roles: {
@@ -171,6 +193,7 @@ export interface Database {
           applications_count?: number;
         };
         Update: Partial<Database["public"]["Tables"]["roles"]["Insert"]>;
+        Relationships: [];
       };
 
       applications: {
@@ -190,13 +213,19 @@ export interface Database {
           reviewed_at: string | null;
           notes: string | null;
         };
-        Insert: Omit<Database["public"]["Tables"]["applications"]["Row"], "created_at" | "status" | "reviewed_at" | "notes"> & {
+        Insert: Omit<Database["public"]["Tables"]["applications"]["Row"], "id" | "created_at" | "phone" | "website" | "linkedin_url" | "experience" | "status" | "reviewed_at" | "notes"> & {
+          id?: string;
           created_at?: string;
+          phone?: string | null;
+          website?: string | null;
+          linkedin_url?: string | null;
+          experience?: string | null;
           status?: ApplicationStatus;
           reviewed_at?: string | null;
           notes?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["applications"]["Insert"]>;
+        Relationships: [];
       };
 
       connections: {
@@ -214,6 +243,7 @@ export interface Database {
           status?: "pending" | "accepted" | "declined";
         };
         Update: Partial<Database["public"]["Tables"]["connections"]["Insert"]>;
+        Relationships: [];
       };
 
       mentors: {
@@ -243,6 +273,7 @@ export interface Database {
           rating?: number | null;
         };
         Update: Partial<Database["public"]["Tables"]["mentors"]["Insert"]>;
+        Relationships: [];
       };
 
       mentor_sessions: {
@@ -261,6 +292,7 @@ export interface Database {
           attendees_count?: number;
         };
         Update: Partial<Database["public"]["Tables"]["mentor_sessions"]["Insert"]>;
+        Relationships: [];
       };
 
       mentor_session_rsvps: {
@@ -270,7 +302,8 @@ export interface Database {
           created_at: string;
         };
         Insert: Omit<Database["public"]["Tables"]["mentor_session_rsvps"]["Row"], "created_at"> & { created_at?: string };
-        Update: never;
+        Update: Partial<Database["public"]["Tables"]["mentor_session_rsvps"]["Insert"]>;
+        Relationships: [];
       };
 
       mentorship_applications: {
@@ -287,12 +320,106 @@ export interface Database {
           status: MentorshipApplicationStatus;
           reviewed_at: string | null;
         };
-        Insert: Omit<Database["public"]["Tables"]["mentorship_applications"]["Row"], "created_at" | "status" | "reviewed_at"> & {
+        Insert: Omit<Database["public"]["Tables"]["mentorship_applications"]["Row"], "id" | "created_at" | "status" | "reviewed_at"> & {
+          id?: string;
           created_at?: string;
           status?: MentorshipApplicationStatus;
           reviewed_at?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["mentorship_applications"]["Insert"]>;
+        Relationships: [];
+      };
+
+      vault_items: {
+        Row: {
+          id: string;
+          title: string;
+          description: string | null;
+          category: string;
+          type: string;
+          file_url: string | null;
+          thumbnail_url: string | null;
+          duration: string | null;
+          pages: number | null;
+          is_featured: boolean;
+          is_new: boolean;
+          sort_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["vault_items"]["Row"], "id" | "created_at" | "updated_at"> & {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["vault_items"]["Insert"]>;
+        Relationships: [];
+      };
+
+      push_subscriptions: {
+        Row: {
+          id: string;
+          user_id: string;
+          endpoint: string;
+          p256dh: string;
+          auth: string;
+          notify_hour: number;
+          timezone: string;
+          enabled: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["push_subscriptions"]["Row"], "id" | "created_at" | "updated_at" | "notify_hour" | "timezone" | "enabled"> & {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+          notify_hour?: number;
+          timezone?: string;
+          enabled?: boolean;
+        };
+        Update: Partial<Database["public"]["Tables"]["push_subscriptions"]["Insert"]>;
+        Relationships: [];
+      };
+
+      notification_log: {
+        Row: {
+          id: string;
+          user_id: string;
+          sent_date: string;
+          type: string;
+          sent_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["notification_log"]["Row"], "id" | "sent_date" | "sent_at"> & {
+          id?: string;
+          sent_date?: string;
+          sent_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["notification_log"]["Insert"]>;
+        Relationships: [];
+      };
+
+      device_push_tokens: {
+        Row: {
+          id: string;
+          user_id: string;
+          platform: "ios" | "android";
+          token: string;
+          notify_hour: number;
+          timezone: string;
+          enabled: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["device_push_tokens"]["Row"], "id" | "created_at" | "updated_at" | "notify_hour" | "timezone" | "enabled"> & {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+          notify_hour?: number;
+          timezone?: string;
+          enabled?: boolean;
+        };
+        Update: Partial<Database["public"]["Tables"]["device_push_tokens"]["Insert"]>;
+        Relationships: [];
       };
     };
     Views: Record<string, never>;
@@ -319,3 +446,6 @@ export type Connection  = Database["public"]["Tables"]["connections"]["Row"];
 export type Mentor      = Database["public"]["Tables"]["mentors"]["Row"];
 export type MentorSession = Database["public"]["Tables"]["mentor_sessions"]["Row"];
 export type MentorshipApplication = Database["public"]["Tables"]["mentorship_applications"]["Row"];
+export type VaultItemRow = Database["public"]["Tables"]["vault_items"]["Row"];
+export type PushSubscription = Database["public"]["Tables"]["push_subscriptions"]["Row"];
+export type DevicePushToken = Database["public"]["Tables"]["device_push_tokens"]["Row"];

@@ -125,7 +125,7 @@ function MentorDetail({
   onBook: () => void;
   onToggleRsvp: (sessionId: string, currentlyRsvpd: boolean) => void;
 }) {
-  const socials = (Array.isArray(mentor.socials) ? mentor.socials : []) as Social[];
+  const socials = (Array.isArray(mentor.socials) ? mentor.socials : []) as unknown as Social[];
 
   return (
     <div className="flex flex-col">

@@ -1,10 +1,27 @@
 import { supabase } from "./supabase";
+import {
+  isNativePlatform,
+  getNativePermissionState,
+  requestNativePermissionAndRegister,
+  unregisterNativePush,
+  updateNativeNotifyHour,
+} from "./nativePush";
 
 export type PermissionState = "default" | "granted" | "denied" | "unsupported";
 
 export function getPermissionState(): PermissionState {
+  // Native apps don't have window.Notification — permission is checked
+  // asynchronously via getPermissionStateAsync() instead.
+  if (isNativePlatform()) return "default";
   if (!("Notification" in window) || !("serviceWorker" in navigator)) return "unsupported";
   return Notification.permission as PermissionState;
+}
+
+// Prefer this on mount when you can await — it resolves the real state on
+// native platforms instead of always reporting "default".
+export async function getPermissionStateAsync(): Promise<PermissionState> {
+  if (isNativePlatform()) return getNativePermissionState();
+  return getPermissionState();
 }
 
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
@@ -17,6 +34,8 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
 }
 
 export async function requestPermissionAndSubscribe(notifyHour = 8, timezone = Intl.DateTimeFormat().resolvedOptions().timeZone): Promise<boolean> {
+  if (isNativePlatform()) return requestNativePermissionAndRegister(notifyHour, timezone);
+
   if (!("Notification" in window)) return false;
 
   const permission = await Notification.requestPermission();
@@ -34,7 +53,7 @@ export async function requestPermissionAndSubscribe(notifyHour = 8, timezone = I
   try {
     const sub = await reg.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(vapidKey),
+      applicationServerKey: urlBase64ToUint8Array(vapidKey) as BufferSource,
     });
 
     const json = sub.toJSON();
@@ -58,6 +77,8 @@ export async function requestPermissionAndSubscribe(notifyHour = 8, timezone = I
 }
 
 export async function unsubscribe(): Promise<void> {
+  if (isNativePlatform()) return unregisterNativePush();
+
   const reg = await navigator.serviceWorker.getRegistration("/sw.js");
   if (!reg) return;
   const sub = await reg.pushManager.getSubscription();
@@ -67,6 +88,8 @@ export async function unsubscribe(): Promise<void> {
 }
 
 export async function updateNotifyHour(hour: number): Promise<void> {
+  if (isNativePlatform()) return updateNativeNotifyHour(hour);
+
   const reg = await navigator.serviceWorker.getRegistration("/sw.js");
   if (!reg) return;
   const sub = await reg.pushManager.getSubscription();
