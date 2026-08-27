@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+/* ── Base typography ── */
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Display helper — Masterclass-style italic serif for hero moments ── */
+.display-serif {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-style: italic;
+}
+
+.display-serif-upright {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-style: normal;
+}
