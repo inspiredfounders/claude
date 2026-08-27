@@ -133,13 +133,11 @@ You'll need to prepare, independent of code:
 
 ## 9. Known gaps to close before submitting
 
-- **Placeholder logo assets**: the Figma Make export didn't include your
-  actual "Inspired Founders" logo files (`InspiredFounders_NorthStarIcon_White.png`,
-  `InspiredFounders_PrimaryLogo_Black.png`, `InspiredFounders_PrimaryLogo_White.png`).
-  Placeholder versions were generated so the app builds, but these **must**
-  be replaced with your real brand files before any store submission —
-  drop the real PNGs into `apps/mobile/src/imports/` with the same
-  filenames.
+- ~~Placeholder logo assets~~ **Done.** All three real brand files are now
+  in `apps/mobile/src/imports/`: `InspiredFounders_PrimaryLogo_Black.svg`,
+  `InspiredFounders_PrimaryLogo_White.svg`,
+  `InspiredFounders_PrimaryLogo_Colour.svg` (used on the app's opening/home
+  screen), and the real `InspiredFounders_NorthStarIcon_White.png`.
 - Native push notifications (section 5) — the client-side registration and
   token storage are now wired up; only the server-side sending (Firebase
   Admin / APNs credentials) is still outstanding, per section 5 above.
