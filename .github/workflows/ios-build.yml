@@ -1,0 +1,64 @@
+name: iOS Compile Check
+
+# Builds the iOS app for the simulator on every change — no signing, no
+# Apple credentials needed. This just proves the native wrapper still
+# compiles. The signed, TestFlight-uploading build lives in
+# ios-release.yml and only runs on demand once its secrets are set.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/mobile/**"
+      - ".github/workflows/ios-build.yml"
+  pull_request:
+    paths:
+      - "apps/mobile/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build for iOS Simulator
+    runs-on: macos-14
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: apps/mobile/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check
+        run: npx tsc --noEmit
+
+      - name: Build web bundle
+        run: npm run build
+
+      - name: Generate iOS project
+        run: npx cap add ios
+
+      - name: Sync Capacitor
+        run: npx cap sync ios
+
+      - name: Install CocoaPods dependencies
+        working-directory: apps/mobile/ios/App
+        run: pod install
+
+      - name: Compile for simulator (unsigned)
+        working-directory: apps/mobile/ios/App
+        run: |
+          xcodebuild \
+            -workspace App.xcworkspace \
+            -scheme App \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            build

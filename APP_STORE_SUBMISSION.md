@@ -9,9 +9,11 @@ can't be created by an AI agent.
 
 | What | Cost | Notes |
 |---|---|---|
-| Apple Developer Program | $99/year | Required to publish on the App Store. Enroll as yourself or as "Inspired Founders" (an Organization enrollment needs a D-U-N-S number — start that early, it can take a few days). |
-| Google Play Console | $25 one-time | Required to publish on Google Play. |
-| A Mac (or cloud Mac) | — | Building and signing the iOS app requires Xcode, which only runs on macOS. If you don't own a Mac, use a cloud CI service that provides macOS runners — Codemagic, Bitrise, or GitHub Actions' `macos-latest` runner all work with Capacitor projects. |
+| Apple Developer Program | $99/year | **Done.** |
+| Google Play Console | $25 one-time | **Done.** |
+
+~~A Mac (or cloud Mac)~~ **Solved** — GitHub Actions now builds and signs
+both apps for you, no Mac needed. See section 3.
 
 ## 2. What's already done in this repo
 
@@ -22,27 +24,43 @@ can't be created by an AI agent.
 - `supabase/migrations` — full database schema, including the new `mentor`
   role and mentor tables.
 
-## 3. Generating the native iOS/Android projects
+## 3. Generating and shipping the native iOS/Android builds
 
-These commands need to run on a machine with the mobile toolchains installed
-(they won't run in this sandbox — no Xcode/Android SDK here):
+This is now automated via GitHub Actions — no Mac, no Xcode, no Android
+Studio required on your end. Four workflows live in `.github/workflows/`:
 
-```bash
-cd apps/mobile
-npm install
-npm run build            # produces dist/
-npx cap add ios          # generates the ios/ Xcode project
-npx cap add android       # generates the android/ Android Studio project
-npx cap sync              # copies web build + plugins into both native projects
-npx cap open ios          # opens Xcode
-npx cap open android      # opens Android Studio
-```
+| Workflow | Runs | What it does |
+|---|---|---|
+| `ios-build.yml` | every push to `main` touching `apps/mobile`, plus PRs | Compiles the iOS app for the simulator (unsigned). Proves the native wrapper still builds. No secrets needed — already active. |
+| `android-build.yml` | same as above | Same idea for Android — an unsigned debug APK. Already active. |
+| `ios-release.yml` | manual only (Actions tab → "Run workflow") | Archives, signs, and uploads to TestFlight, using an App Store Connect API key so there's no certificate/provisioning-profile file wrangling. |
+| `android-release.yml` | manual only | Builds a signed release AAB and uploads it to a Play Console track (internal by default) via a service account. |
 
-From there, iOS: set your Team/signing in Xcode, archive, and upload via
-Xcode Organizer or Transporter. Android: build a signed AAB via Android
-Studio's Build > Generate Signed Bundle, using a keystore you create and
-**back up somewhere safe** (losing it means you can never update the app
-under the same listing again).
+The two `*-release.yml` workflows need secrets added once, under this
+repo's **Settings → Secrets and variables → Actions**:
+
+**For `ios-release.yml`:**
+- `APPLE_TEAM_ID` — developer.apple.com → Membership.
+- `APPSTORE_ISSUER_ID` and `APPSTORE_KEY_ID` — App Store Connect → Users
+  and Access → Keys → generate a new key.
+- `APPSTORE_PRIVATE_KEY` — the `.p8` file's full contents (Apple only lets
+  you download it once when you generate the key — save it somewhere safe
+  immediately).
+
+**For `android-release.yml`:**
+- `ANDROID_KEYSTORE_BASE64` — a release keystore you generate once with
+  `keytool -genkeypair`, base64-encoded (`base64 -i my-release.keystore`).
+  **Back the original file up somewhere safe** — losing it means you can
+  never update this app's listing again.
+- `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`
+  — set when you generate the keystore.
+- `PLAY_SERVICE_ACCOUNT_JSON` — Play Console → Users and permissions →
+  Invite new users → "Service account", grant it Release Manager access to
+  this app, then generate a JSON key for it in Google Cloud Console.
+
+Add secrets as you get each credential — the release workflows simply
+won't run correctly until theirs are all in place. Ping me once they're
+set and I'll trigger a run.
 
 ## 4. App icons & splash screens
 
