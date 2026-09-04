@@ -1,0 +1,39 @@
+name: Supabase Migrate (Production)
+
+# Runs every file in supabase/migrations/ against the live project —
+# creates all tables, RLS policies, and the three storage buckets.
+# Manual only, since this touches production. Needs two secrets first
+# (Settings → Secrets and variables → Actions):
+#
+#   SUPABASE_ACCESS_TOKEN   Personal access token — Supabase Dashboard →
+#                           Account → Access Tokens → Generate new token.
+#   SUPABASE_DB_PASSWORD    The project's Postgres password, set when the
+#                           project was created. If it's been forgotten,
+#                           reset it: Project Settings → Database →
+#                           Reset database password.
+#
+# The project ref (yrqixvpprmbokxaosmez) is already public — it's in the
+# app's own source (src/lib/supabase.ts) — so it's inlined below rather
+# than kept as a secret.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: yrqixvpprmbokxaosmez
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link project
+        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
+
+      - name: Push migrations
+        run: supabase db push --password "${{ secrets.SUPABASE_DB_PASSWORD }}"
