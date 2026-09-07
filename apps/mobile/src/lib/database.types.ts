@@ -37,11 +37,13 @@ export interface Database {
           sun_sign: string | null;
           moon_sign: string | null;
           rising_sign: string | null;
+          interests: string[];
         };
-        Insert: Omit<Database["public"]["Tables"]["profiles"]["Row"], "created_at" | "updated_at" | "is_verified"> & {
+        Insert: Omit<Database["public"]["Tables"]["profiles"]["Row"], "created_at" | "updated_at" | "is_verified" | "interests"> & {
           created_at?: string;
           updated_at?: string;
           is_verified?: boolean;
+          interests?: string[];
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
         Relationships: [];

@@ -7,7 +7,6 @@ import { Home, Calendar, User, Sparkles, BookOpen, Sun, Moon } from "lucide-reac
 import northStarIcon from "../imports/InspiredFounders_NorthStarIcon_White.png";
 import logoColour from "../imports/InspiredFounders_PrimaryLogo_Colour.svg";
 import { OnboardingFlow } from "./components/OnboardingFlow";
-import type { OnboardingData } from "./components/OnboardingFlow";
 import { JoinClubModal } from "./components/JoinClubModal";
 import { HomeScreen } from "./components/HomeScreen";
 import { EventsScreen } from "./components/EventsScreen";
@@ -314,7 +313,7 @@ export default function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleOnboardingComplete = (_data: OnboardingData) => setScreen("app");
+  const handleOnboardingComplete = () => setScreen("app");
 
   const handleTabPress = (tab: MainTab, gated: boolean) => {
     if (gated && !isMember) setShowModal(true);

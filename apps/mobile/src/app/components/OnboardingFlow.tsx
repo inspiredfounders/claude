@@ -142,27 +142,6 @@ function CreateAccount({
         </div>
       </div>
 
-      {/* Divider */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.12)" }} />
-        <span className="text-white/30 text-xs">or continue with</span>
-        <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.12)" }} />
-      </div>
-
-      {/* Social */}
-      <div className="flex gap-3 mb-8">
-        {["Google", "Apple"].map((provider) => (
-          <button
-            key={provider}
-            onClick={onNext}
-            className="flex-1 py-3 rounded-2xl text-white text-sm"
-            style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", fontWeight: 600 }}
-          >
-            {provider}
-          </button>
-        ))}
-      </div>
-
       <button
         onClick={onNext}
         disabled={!valid}
@@ -251,12 +230,14 @@ function ChooseInterests({
 
 // ─── Step 3: Founder Profile ──────────────────────────────────────────────────
 function FounderProfile({
-  data, onChange, onNext, onBack,
+  data, onChange, onNext, onBack, submitting, error,
 }: {
   data: OnboardingData;
   onChange: (patch: Partial<OnboardingData>) => void;
   onNext: () => void;
   onBack: () => void;
+  submitting: boolean;
+  error: string;
 }) {
   const [avatarIdx, setAvatarIdx] = useState(0);
   const valid = data.company.trim().length > 0 && data.stage !== "";
@@ -366,13 +347,19 @@ function FounderProfile({
         </div>
       </div>
 
+      {error && (
+        <p className="text-sm mb-4 text-center" style={{ color: "var(--primary)", fontWeight: 600 }}>
+          {error}
+        </p>
+      )}
+
       <button
         onClick={onNext}
-        disabled={!valid}
+        disabled={!valid || submitting}
         className="w-full py-4 rounded-2xl text-white text-sm flex items-center justify-center gap-2 transition-opacity"
-        style={{ background: "var(--brand-gradient)", fontWeight: 700, opacity: valid ? 1 : 0.4 }}
+        style={{ background: "var(--brand-gradient)", fontWeight: 700, opacity: valid && !submitting ? 1 : 0.4 }}
       >
-        Complete Profile <ChevronRight size={17} />
+        {submitting ? "Creating account…" : <>Complete Profile <ChevronRight size={17} /></>}
       </button>
     </div>
   );
@@ -397,12 +384,39 @@ export function OnboardingFlow({ onComplete, onBack }: Props) {
     bio: "",
     avatarPreview: null,
   });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   const patch = (p: Partial<OnboardingData>) => setData((d) => ({ ...d, ...p }));
   const next = () => setStep((s) => Math.min(s + 1, STEPS.length - 1));
   const back = () => {
     if (step === 0) onBack();
     else setStep((s) => s - 1);
+  };
+
+  const handleSubmit = async () => {
+    setError("");
+    setSubmitting(true);
+    try {
+      const { signUp } = await import("../../lib/api/auth");
+      const { updateProfile } = await import("../../lib/api/profiles");
+      const { user } = await signUp(data.email.trim(), data.password, data.name.trim());
+      if (user) {
+        await updateProfile(user.id, {
+          company: data.company.trim(),
+          company_stage: data.stage,
+          location: data.location.trim() || null,
+          bio: data.bio.trim() || null,
+          avatar_url: data.avatarPreview,
+          interests: data.interests,
+        });
+      }
+      onComplete(data);
+    } catch (err: any) {
+      setError(err?.message ?? "Couldn't create your account. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const currentStep = STEPS[step];
@@ -451,7 +465,7 @@ export function OnboardingFlow({ onComplete, onBack }: Props) {
             <ChooseInterests data={data} onChange={patch} onNext={next} onBack={back} />
           )}
           {currentStep === "founder-profile" && (
-            <FounderProfile data={data} onChange={patch} onNext={() => onComplete(data)} onBack={back} />
+            <FounderProfile data={data} onChange={patch} onNext={handleSubmit} onBack={back} submitting={submitting} error={error} />
           )}
         </motion.div>
       </AnimatePresence>
