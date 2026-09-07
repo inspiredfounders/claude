@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gmail Dashboard</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <h1>Gmail Dashboard</h1>
+      <button id="refresh-btn" class="btn btn-ghost">Refresh</button>
+    </header>
+
+    <main id="columns" class="columns">
+      <p class="loading">Loading accounts…</p>
+    </main>
+
+    <template id="column-template">
+      <section class="column">
+        <div class="column-header">
+          <span class="dot"></span>
+          <div class="column-title">
+            <div class="column-label"></div>
+            <div class="column-email"></div>
+          </div>
+          <button class="btn btn-small connect-btn">Connect</button>
+        </div>
+        <div class="column-body">
+          <p class="empty">No unread or flagged emails.</p>
+        </div>
+      </section>
+    </template>
+
+    <template id="email-template">
+      <article class="email">
+        <div class="email-meta">
+          <span class="badge badge-unread">unread</span>
+          <span class="badge badge-starred">★ flagged</span>
+        </div>
+        <div class="email-from"></div>
+        <div class="email-subject"></div>
+        <div class="email-snippet"></div>
+        <div class="email-actions">
+          <button class="btn btn-small archive-btn">Archive</button>
+          <div class="label-picker">
+            <input type="text" class="label-input" placeholder="Label…" list="label-options" />
+            <button class="btn btn-small label-btn">Apply</button>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <datalist id="label-options"></datalist>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
